@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Websocket Test-Page</title>
+</head>
+<body>
+    <script>
+
+        var ws;
+
+        function connect()
+        {
+            var endpoint = document.getElementById('endpoint');
+
+            webSocket = window.WebSocket;
+            ws = new webSocket(endpoint.value);
+
+            ws.onopen = function (e) {
+                log('CONNECTION TO SERVER OPENED', '');
+                toggleMsg(true);
+                toggleConnect(true);
+            }
+
+            ws.onclose = function (e) {
+                log('CONNECTION TO SERVER CLOSED', '');
+                toggleMsg(false);
+                toggleConnect(false);
+            }
+
+            ws.onmessage = function (e) {
+                log('', e.data);
+            }
+        }
+
+        function disconnect()
+        {
+            ws.close()
+        }
+
+        function toggleConnect(connected) {
+            var disconnect = document.getElementById('disconnectbtn')
+            var connect = document.getElementById('connectbtn')
+
+            if (connected) {
+                disconnect.style.visibility = 'visible';
+                connect.style.visibility = 'hidden';
+            }
+            else {
+                disconnect.style.visibility = 'hidden';
+                connect.style.visibility = 'visible';
+            }
+        }
+
+        function toggleMsg(visible)
+        {
+            var panel = document.getElementById('msgpanel')
+
+            if (visible) {
+                panel.style.visibility = 'visible'
+            }
+            else {
+                panel.style.visibility = 'hidden'
+            }
+        }
+
+        function sendMsg()
+        {
+            var msg = document.getElementById('message')
+
+            try {
+
+                ws.send(msg.value);
+
+                log(msg.value, '');
+
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        function log(tx, rx)
+        {
+            var tableRef = document.getElementById('log').getElementsByTagName('tbody')[0];
+
+            var newRow = tableRef.insertRow(tableRef.rows.length);
+            var newCellTx = newRow.insertCell(0);
+            var newCellRx = newRow.insertCell(1);
+            var newTextTx = document.createTextNode(tx);
+            var newTextRx = document.createTextNode(rx);
+
+            newCellTx.appendChild(newTextTx);
+            newCellRx.appendChild(newTextRx);
+        }
+
+    </script>
+    <div id="connectpanel" style="visibility: visible">
+        <label for="endpoint">endpoint</label>
+        <input id="endpoint" type="text" name="endpoint" value="ws://localhost:8181" />
+        <input id="connectbtn" type="button" name="disconnectbtn" value="connect" onclick="connect()" />
+        <input id="disconnectbtn" style="visibility: hidden" type="button" name="disconnectbtn" value="disconnect" onclick="disconnect()" />
+    </div>
+        <br />
+        <br />
+        <br />
+
+        <div id="msgpanel" style="visibility: hidden">
+            <input id="message" type="text" name="message" value="Your Message" />
+            <input type="button" name="send" value="send" onclick="sendMsg()" />
+        </div>
+
+        <br />
+        <br />
+        <br />
+        <br />
+
+        <table id="log">
+            <thead>
+                <tr>
+                    <th>TX - Client to Server</th>
+                    <th>RX - Server to Client</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+</body>
+</html>
